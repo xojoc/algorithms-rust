@@ -17,4 +17,4 @@ lint:
 push:
 	git commit -m s -a
 	git push
-	
+	git status
