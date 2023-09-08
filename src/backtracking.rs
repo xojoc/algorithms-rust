@@ -188,7 +188,7 @@ fn _nqueens_list(rows: &mut [usize], current_row: usize, solutions: &mut Vec<Vec
             }
 
             // check if same diagonal (from right to left)
-            if rows[row] - (current_row - row) == col {
+            if rows[row] == col + (current_row - row) {
                 ok = false;
                 break;
             }
@@ -300,5 +300,6 @@ mod tests {
         assert_eq!(nqueens_list(1), vec![vec![0]]);
         assert_eq!(nqueens_list(2), vec![] as Vec<Vec<usize>>);
         assert_eq!(nqueens_list(4).len(), 2);
+        assert_eq!(nqueens_list(8).len(), 92);
     }
 }
