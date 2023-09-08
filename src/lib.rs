@@ -1,5 +1,5 @@
+pub mod backtracking;
 pub mod binary_tree;
-pub mod misc;
 pub mod sort;
 
 fn _binary_search_recursive<T: PartialOrd + std::fmt::Debug>(
