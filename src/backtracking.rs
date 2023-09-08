@@ -299,5 +299,6 @@ mod tests {
         assert_eq!(nqueens_list(0), vec![vec![]]);
         assert_eq!(nqueens_list(1), vec![vec![0]]);
         assert_eq!(nqueens_list(2), vec![] as Vec<Vec<usize>>);
+        assert_eq!(nqueens_list(4).len(), 2);
     }
 }
