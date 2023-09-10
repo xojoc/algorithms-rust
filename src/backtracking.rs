@@ -210,7 +210,82 @@ pub fn nqueens_list(n: usize) -> Vec<Vec<usize>> {
     return solutions;
 }
 
-pub fn addition_chain_minimum(n: u64) -> Vec<u64> {}
+fn _addition_chains(
+    n: u64,
+    starting_from: u64,
+    chain: &mut Vec<u64>,
+    solutions: &mut Vec<Vec<u64>>,
+) {
+    if starting_from > n {
+        if !solutions.contains(chain) {
+            solutions.push(chain.clone());
+        }
+        return;
+    }
+
+    for x in starting_from..=n {
+        for j in 0..chain.len() {
+            for i in 0..=j {
+                if chain[i] + chain[j] == x {
+                    dbg!(starting_from);
+                    dbg!(x);
+                    dbg!(j);
+                    dbg!(i);
+                    dbg!(&chain);
+                    chain.push(x);
+                    _addition_chains(n, x + 1, chain, solutions);
+                    chain.pop();
+                }
+            }
+        }
+    }
+}
+
+pub fn addition_chains(n: u64) -> Vec<Vec<u64>> {
+    if n == 0 {
+        return vec![];
+    }
+    let mut chain = vec![1];
+    let mut solutions = vec![];
+    _addition_chains(n, 2, &mut chain, &mut solutions);
+    // solutions.sort();
+    return solutions;
+}
+fn _longest_common_subsequence(
+    a: &[usize],
+    ai: usize,
+    b: &[usize],
+    bi: usize,
+    lcs: &mut Vec<usize>,
+) {
+    if ai >= a.len() || bi >= b.len() {
+        return;
+    }
+    if a[ai] == b[bi] {
+        lcs.push(a[ai]);
+        _longest_common_subsequence(a, ai + 1, b, bi + 1, lcs);
+    } else {
+        let mut lena = vec![];
+        let mut lenb = vec![];
+        _longest_common_subsequence(a, ai + 1, b, bi, &mut lena);
+        _longest_common_subsequence(a, ai, b, bi + 1, &mut lenb);
+
+        if lena.len() > lenb.len() {
+            lcs.resize(lena.len(), 0);
+            lcs.copy_from_slice(&lena);
+        } else {
+            lcs.resize(lenb.len(), 0);
+            lcs.copy_from_slice(&lenb);
+        }
+    }
+}
+pub fn longest_common_subsequence(a: &[usize], b: &[usize]) -> Vec<usize> {
+    let mut lcs = vec![];
+
+    _longest_common_subsequence(a, 0, b, 0, &mut lcs);
+
+    return lcs;
+}
 
 #[cfg(test)]
 mod tests {
@@ -303,5 +378,26 @@ mod tests {
         assert_eq!(nqueens_list(2), vec![] as Vec<Vec<usize>>);
         assert_eq!(nqueens_list(4).len(), 2);
         assert_eq!(nqueens_list(8).len(), 92);
+    }
+
+    #[test]
+    fn addition_chains_test() {
+        assert_eq!(addition_chains(0), vec![] as Vec<Vec<u64>>);
+        assert_eq!(addition_chains(2), vec![vec![1, 2]]);
+        assert_eq!(
+            addition_chains(5),
+            vec![vec![1, 2, 3, 4, 5], vec![1, 2, 3, 5], vec![1, 2, 4, 5]]
+        );
+    }
+
+    #[test]
+    fn longest_common_subsequence_test() {
+        assert_eq!(longest_common_subsequence(&[], &[]), &[]);
+        assert_eq!(longest_common_subsequence(&[1], &[1]), &[1]);
+        assert_eq!(longest_common_subsequence(&[1, 2, 1], &[2]), &[2]);
+        assert_eq!(
+            longest_common_subsequence(&[1, 2, 1, 5, 7, 8, 9], &[2, 1, 7, 8, 9]),
+            &[7, 8, 9]
+        );
     }
 }
