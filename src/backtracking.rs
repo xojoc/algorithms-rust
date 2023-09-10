@@ -210,6 +210,8 @@ pub fn nqueens_list(n: usize) -> Vec<Vec<usize>> {
     return solutions;
 }
 
+pub fn addition_chain_minimum(n: u64) -> Vec<u64> {}
+
 #[cfg(test)]
 mod tests {
     use super::*;
