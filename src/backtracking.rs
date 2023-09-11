@@ -287,6 +287,126 @@ pub fn longest_common_subsequence(a: &[usize], b: &[usize]) -> Vec<usize> {
     return lcs;
 }
 
+fn _shortest_common_supersequence(
+    a: &[u64],
+    ai: usize,
+    b: &[u64],
+    bi: usize,
+    scs: &mut Vec<u64>,
+    current_sequence: &mut Vec<u64>,
+) {
+    if ai >= a.len() && bi >= b.len() {
+        if scs.len() == 0 || current_sequence.len() < scs.len() {
+            scs.resize(current_sequence.len(), 0);
+            scs.copy_from_slice(&current_sequence);
+        }
+        return;
+    }
+
+    if ai >= a.len() || bi >= b.len() || a[ai] == b[bi] {
+        current_sequence.push(if ai < a.len() { a[ai] } else { b[bi] });
+        _shortest_common_supersequence(a, ai + 1, b, bi + 1, scs, current_sequence);
+        current_sequence.pop();
+    } else {
+        current_sequence.push(a[ai]);
+        _shortest_common_supersequence(a, ai + 1, b, bi, scs, current_sequence);
+        current_sequence.pop();
+        current_sequence.push(b[bi]);
+        _shortest_common_supersequence(a, ai, b, bi + 1, scs, current_sequence);
+        current_sequence.pop();
+    }
+}
+pub fn shortest_common_supersequence(a: &[u64], b: &[u64]) -> Vec<u64> {
+    let mut scs = vec![];
+    let mut current_sequence = vec![];
+
+    _shortest_common_supersequence(a, 0, b, 0, &mut scs, &mut current_sequence);
+
+    return scs;
+}
+
+#[derive(PartialEq)]
+enum Direction {
+    Increasing,
+    Decreasing,
+}
+
+fn _longest_bitonic_sequence(
+    a: &[u64],
+    ai: usize,
+    direction: Direction,
+    lbs_start: &mut usize,
+    lbs_end: &mut usize,
+    current_sequence_start: &mut usize,
+    current_sequence_end: &mut usize,
+) {
+    if (*current_sequence_end - *current_sequence_start) > (*lbs_end - *lbs_start) {
+        *lbs_start = *current_sequence_start;
+        *lbs_end = *current_sequence_end;
+    }
+    if ai == a.len() {
+        return;
+    }
+
+    if ai == 0
+        || (direction == Direction::Increasing && a[ai - 1] < a[ai]
+            || direction == Direction::Decreasing && a[ai - 1] > a[ai])
+    {
+        *current_sequence_end += 1;
+        _longest_bitonic_sequence(
+            a,
+            ai + 1,
+            direction,
+            lbs_start,
+            lbs_end,
+            current_sequence_start,
+            current_sequence_end,
+        );
+    } else {
+        if direction == Direction::Increasing {
+            *current_sequence_end += 1;
+            _longest_bitonic_sequence(
+                a,
+                ai + 1,
+                Direction::Decreasing,
+                lbs_start,
+                lbs_end,
+                current_sequence_start,
+                current_sequence_end,
+            );
+        } else {
+            *current_sequence_start = ai;
+            *current_sequence_end = *current_sequence_start + 1;
+            _longest_bitonic_sequence(
+                a,
+                ai + 1,
+                Direction::Increasing,
+                lbs_start,
+                lbs_end,
+                current_sequence_start,
+                current_sequence_end,
+            );
+        }
+    }
+}
+
+pub fn longest_bitonic_sequence(a: &[u64]) -> &[u64] {
+    let mut lbs_start = 0;
+    let mut lbs_end = 0;
+    let mut current_sequence_start = 0;
+    let mut current_sequence_end = 0;
+    _longest_bitonic_sequence(
+        a,
+        0,
+        Direction::Increasing,
+        &mut lbs_start,
+        &mut lbs_end,
+        &mut current_sequence_start,
+        &mut current_sequence_end,
+    );
+
+    return &a[lbs_start..lbs_end];
+}
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -398,6 +518,28 @@ mod tests {
         assert_eq!(
             longest_common_subsequence(&[1, 2, 1, 5, 7, 8, 9], &[2, 1, 7, 8, 9]),
             &[7, 8, 9]
+        );
+    }
+
+    #[test]
+    fn shortest_common_supersequence_test() {
+        assert_eq!(shortest_common_supersequence(&[], &[]), &[]);
+        assert_eq!(shortest_common_supersequence(&[1], &[1]), &[1]);
+        assert_eq!(shortest_common_supersequence(&[2], &[1, 2]), &[1, 2]);
+        assert_eq!(
+            shortest_common_supersequence(&[5, 6, 7, 8], &[6, 8, 9]),
+            &[5, 6, 7, 8, 9]
+        );
+    }
+
+    #[test]
+    fn longest_bitonic_sequence_test() {
+        assert_eq!(longest_bitonic_sequence(&[]), &[]);
+        assert_eq!(longest_bitonic_sequence(&[1]), &[1]);
+        assert_eq!(longest_bitonic_sequence(&[1, 2, 3, 2, 1]), &[1, 2, 3, 2, 1]);
+        assert_eq!(
+            longest_bitonic_sequence(&[1, 2, 3, 2, 1, 5, 6, 7, 8, 4, 2, 10]),
+            &[5, 6, 7, 8, 4, 2]
         );
     }
 }
