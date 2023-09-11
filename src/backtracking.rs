@@ -227,11 +227,6 @@ fn _addition_chains(
         for j in 0..chain.len() {
             for i in 0..=j {
                 if chain[i] + chain[j] == x {
-                    dbg!(starting_from);
-                    dbg!(x);
-                    dbg!(j);
-                    dbg!(i);
-                    dbg!(&chain);
                     chain.push(x);
                     _addition_chains(n, x + 1, chain, solutions);
                     chain.pop();
@@ -407,6 +402,76 @@ pub fn longest_bitonic_sequence(a: &[u64]) -> &[u64] {
 
     return &a[lbs_start..lbs_end];
 }
+
+pub fn longest_oscilating_sequence(a: &[u64]) -> &[u64] {
+    let mut current_sequence_start = 0;
+    let mut current_sequence_end = 0;
+    let mut los_start = 0;
+    let mut los_end = 0;
+
+    _longest_oscilating_sequence(
+        a,
+        0,
+        &mut current_sequence_start,
+        &mut current_sequence_end,
+        &mut los_start,
+        &mut los_end,
+    );
+
+    return &a[los_start..los_end];
+}
+
+// todo: rewrite these functions using return values instead of pointers?
+fn _longest_oscilating_sequence(
+    a: &[u64],
+    ai: usize,
+    current_sequence_start: &mut usize,
+    current_sequence_end: &mut usize,
+    los_start: &mut usize,
+    los_end: &mut usize,
+) {
+    if (*current_sequence_end - *current_sequence_start) > (*los_end - *los_start) {
+        *los_start = *current_sequence_start;
+        *los_end = *current_sequence_end;
+    }
+    if ai >= a.len() {
+        return;
+    }
+
+    dbg!(
+        a[ai],
+        ai,
+        *current_sequence_start,
+        *current_sequence_end,
+        *los_start,
+        *los_end
+    );
+    dbg!();
+
+    if ai == a.len() - 1 || (ai % 2 == 0 && a[ai] < a[ai + 1]) || (ai % 2 == 1 && a[ai] > a[ai + 1])
+    {
+        *current_sequence_end += 1;
+        _longest_oscilating_sequence(
+            a,
+            ai + 1,
+            current_sequence_start,
+            current_sequence_end,
+            los_start,
+            los_end,
+        );
+    } else {
+        *current_sequence_start = ai + 1;
+        *current_sequence_end = ai + 1;
+        _longest_oscilating_sequence(
+            a,
+            ai + 1,
+            current_sequence_start,
+            current_sequence_end,
+            los_start,
+            los_end,
+        )
+    }
+}
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -540,6 +605,17 @@ mod tests {
         assert_eq!(
             longest_bitonic_sequence(&[1, 2, 3, 2, 1, 5, 6, 7, 8, 4, 2, 10]),
             &[5, 6, 7, 8, 4, 2]
+        );
+    }
+
+    #[test]
+    fn longest_oscilating_sequence_test() {
+        assert_eq!(longest_oscilating_sequence(&[]), &[]);
+        assert_eq!(longest_oscilating_sequence(&[1]), &[1]);
+        assert_eq!(longest_oscilating_sequence(&[1, 2, 1]), &[1, 2, 1]);
+        assert_eq!(
+            longest_oscilating_sequence(&[1, 2, 1, 0, 10, 11, 10, 11, 10]),
+            &[10, 11, 10, 11, 10]
         );
     }
 }
